@@ -31,12 +31,45 @@ class CheckoutOrderManager implements CheckoutOrderManagerInterface {
    * {@inheritdoc}
    */
   public function getCheckoutFlow(OrderInterface $order) {
-    if ($order->checkout_flow->isEmpty()) {
-      $order->checkout_flow = $this->chainCheckoutFlowResolver->resolve($order);
+    if ($order->get('checkout_flow')->isEmpty()) {
+      $checkout_flow = $this->chainCheckoutFlowResolver->resolve($order);
+      $order->set('checkout_flow', $checkout_flow);
       $order->save();
     }
 
-    return $order->checkout_flow->entity;
+    return $order->get('checkout_flow')->entity;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCheckoutStepId(OrderInterface $order, $requested_step_id = NULL) {
+    $checkout_flow = $this->getCheckoutFlow($order);
+    $available_step_ids = array_keys($checkout_flow->getPlugin()->getVisibleSteps());
+    $selected_step_id = $order->get('checkout_step')->value;
+    $selected_step_id = $selected_step_id ?: reset($available_step_ids);
+    if (empty($requested_step_id) || $requested_step_id == $selected_step_id) {
+      return $selected_step_id;
+    }
+    if (!in_array($requested_step_id, $available_step_ids)) {
+      return $selected_step_id;
+    }
+
+    if ($order->getState()->value == 'draft') {
+      // Allow access to previously completed steps, and the current step.
+      $requested_step_index = array_search($requested_step_id, $available_step_ids);
+      $selected_step_index = array_search($selected_step_id, $available_step_ids);
+      if ($requested_step_index <= $selected_step_index) {
+        $selected_step_id = $requested_step_id;
+      }
+    }
+    else {
+      // Customers can't edit placed orders, so they're only allowed
+      // to see the 'complete' step.
+      $selected_step_id = 'complete';
+    }
+
+    return $selected_step_id;
   }
 
 }
