@@ -259,7 +259,7 @@ class OrderItem extends ContentEntityBase implements OrderItemInterface {
     $fields['quantity'] = BaseFieldDefinition::create('decimal')
       ->setLabel(t('Quantity'))
       ->setDescription(t('The number of purchased units.'))
-      ->setReadOnly(TRUE)
+      ->setRequired(TRUE)
       ->setSetting('unsigned', TRUE)
       ->setSetting('min', 0)
       ->setDefaultValue(1)
