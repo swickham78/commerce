@@ -10,3 +10,11 @@ services:
   commerce_product.variation_field_renderer:
     class: Drupal\commerce_product\ProductVariationFieldRenderer
     arguments: ['@entity_type.manager', '@entity_field.manager']
+
+  commerce_product.autocomplete_matcher:
+    class: Drupal\commerce_product\Entity\ProductAutocompleteMatcher
+    public: false
+    decorates: entity.autocomplete_matcher
+    decoration_priority: 3
+    arguments: ['@commerce_product.autocomplete_matcher.inner', '@entity_type.manager', '@commerce_price.number_formatter_factory', '@plugin.manager.entity_reference_selection']
+
