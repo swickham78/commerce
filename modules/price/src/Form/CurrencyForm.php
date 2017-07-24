@@ -59,9 +59,11 @@ class CurrencyForm extends EntityForm {
       '#maxlength' => 255,
       '#required' => TRUE,
     ];
+    $iso_4217_url = Url::fromUri('https://en.wikipedia.org/wiki/ISO_4217#Active_codes')->toString();
     $form['currencyCode'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Currency code'),
+      '#description' => $this->t('The three letter code, as defined by <a href=":url" target="_blank">ISO 4217</a>.', [':url' => $iso_4217_url]),
       '#default_value' => $currency->getCurrencyCode(),
       '#element_validate' => ['::validateCurrencyCode'],
       '#pattern' => '[A-Z]{3}',
@@ -71,7 +73,6 @@ class CurrencyForm extends EntityForm {
       '#disabled' => !$currency->isNew(),
       '#required' => TRUE,
     ];
-    $iso_4217_url = Url::fromUri('https://en.wikipedia.org/wiki/ISO_4217')->toString();
     $form['numericCode'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Numeric code'),
@@ -87,6 +88,7 @@ class CurrencyForm extends EntityForm {
     $form['symbol'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Symbol'),
+      '#description' => $this->t('Currency symbol used to denote that the number is a monetary value.'),
       '#default_value' => $currency->getSymbol(),
       '#placeholder' => '$',
       '#maxlength' => 4,
